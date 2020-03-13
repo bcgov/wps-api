@@ -14,12 +14,14 @@ pep8 = "*"
 pytest-pep8 = "*"
 pandas = "*"
 pylint = "*"
+matplotlib = "*"
 
 [packages]
 fastapi = "*"
 uvicorn = "*"
 python-multipart = "*"
 requests = "*"
+aiofiles = "*"
 
 [requires]
 python_version = "3.6"

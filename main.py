@@ -5,6 +5,7 @@ from typing import List, Dict
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Form, status, HTTPException
+from fastapi.staticfiles import StaticFiles
 import os
 
 api_info = '''
@@ -100,6 +101,8 @@ app = FastAPI(
     description=api_info,
     version="0.0.0"
 )
+
+app.mount("/data", StaticFiles(directory="data"), name="data")
 
 origins = getenv('ORIGINS')
 
