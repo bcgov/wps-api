@@ -3,7 +3,7 @@ Proof of concept for importing grib2 files into postgis.
 NOTE: in order for this to run, one needs postgress installed on the local machine, as it uses raster2pgsql.
 
 Notes to future self:
-# 1'st I tried eccodes
+# 1'st, I tried eccodes, iterating through records.
 
 eccodes is a bit of a pain, you need to compile it, and then you
 can iterate through each of the records of the grib file. You'd have
@@ -11,6 +11,35 @@ to then populate a geospatial db to query - I didn't get that far.
 
 It's worth looking at alternatives to eccodes, like gdal can also do it for
 you.
+
+I think this is going to be the route to go!
+
+# 2nd, I tried importing rasters directly into postgis.
+
+There are problems with this. It's real easy to get the data in, and to do a query,
+but queries are slow when there are multiple rasters involved.
+
+I tried cropping the data, to only BC, to see how much faster I could get it - see below:
+
+Crop the raster to contain BC only:
+INSERT INTO wps.temperature (rid, rast, filename)
+SELECT nextval('temperature_rid_seq'), ST_Clip(rast,
+			  ST_MakePolygon( 
+	ST_GeomFromText('LINESTRING(-140 61,-113 61,-113 47, -140 47, -140 61)'))
+			  , false),
+			  filename from wps.temperature
+			  where rid <= 243;
+
+Now select using only the cropped records:
+select rid, filename, ST_Value(rast, foo.pt_geom) as v1 from wps.temperature cross join 
+(select ST_SetSRID(ST_Point(-123.38544, 48.44023), 0) as pt_geom) as foo
+where rid > 243
+order by filename
+
+It was faster, on my computer, it went from 6 seconds, to 2 seconds - but that's
+not fast enough! We need much faster results, since we need to pull a whole
+bunch of values, not just temperature, so I don't think this is a good solution.
+
 
 # Things to consider:
 ##  If going the grib -> sql -> postgis path:
