@@ -32,7 +32,6 @@ RUN ORIGINS="testorigin" ./scripts/test.sh
 # Stage 1:
 #
 # We now start a nice clean build - that has only the bare minimum of what we need
-
 FROM python:3.6
 
 # Copy the requirements.txt from the 1st stage of the build.

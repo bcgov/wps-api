@@ -33,6 +33,8 @@ Install system dependancies:
 brew install pyenv
 pyenv install 3.6.10
 brew install pipenv
+brew install postgresql
+brew install postgis
 ```
 
 Install project requirements:
@@ -44,6 +46,8 @@ If you have trouble getting pipenv to resolve python 3.8.1, you can also try:
 ```
 pipenv install --python ~/.pyenv/versions/3.6.10/bin/python3.6 --dev
 ```
+
+If you have trouble installing psycopg2, it may be that you haven't installed postgresql.
 #### Local machine, running Ubuntu os 
 
 If you have trouble installing pyodbc, you can try:
@@ -106,6 +110,29 @@ Or enforce by running [scripts/test.sh](scripts/test.sh) as part of your ci/cd p
 ## Architecture
 
 ![FWI calculator container diagram](container_diagram.png)
+
+## GRIB
+
+### my notes using gdal
+Dependancies
+```
+brew install gdal
+brew install postgresql
+brew install postgis
+```
+Import
+```
+raster2pgsql raster_options schema.table_name > output.sql
+raster2pgsql CMC_glb_TMP_TGL_2_latlon.24x.24_2020032600_P000.grib2 wps.temperature > output.sql
+psql --host=localhost --username=wps --dbname=wps -f output.sql
+```
+Query (connect to your postgis db)
+```
+create schema wps;
+
+select rid, ST_Value(rast, foo.pt_geom) as v1 from wps.temperature cross join 
+(select ST_SetSRID(ST_Point(-123.38544, 48.44023), 0) as pt_geom) as foo
+```
 
 ## License
 

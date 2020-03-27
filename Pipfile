@@ -20,6 +20,8 @@ fastapi = "*"
 uvicorn = "*"
 requests = "*"
 gunicorn = "*"
+wget = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.6"

@@ -16,3 +16,14 @@ services:
       - .env
     volumes:
       - .:/app:delegated
+  db:
+    image: mdillon/postgis
+    hostname: db
+    ports: 
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: wps
+      POSTGRES_PASSWORD: wps
+      POSTGRES_DATABASE: wps
+    volumes:
+      - /var/lib/postgresql

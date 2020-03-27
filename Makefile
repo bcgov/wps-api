@@ -47,3 +47,6 @@ docker-run-dev:
 docker-run:
 	# Run api in production mode, in docker.
 	docker-compose up
+
+weather:
+	pipenv run python scripts/grib.py
