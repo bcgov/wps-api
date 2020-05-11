@@ -3,6 +3,7 @@
 **/*.grib2
 grib
 csv
+junk
 .vscode
 .github
 .ipynb_checkpoints
