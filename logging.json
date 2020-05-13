@@ -23,10 +23,25 @@
       "level": "DEBUG",
       "handlers": ["console"],
       "propagate": false
+    },
+    "wildfire_one": {
+      "level": "DEBUG",
+      "handlers": ["console"],
+      "propagate": false
+    },
+    "config": {
+      "level": "DEBUG",
+      "handlers": ["console"],
+      "propagate": false
+    },
+    "tests": {
+      "level": "DEBUG",
+      "handlers": ["console"],
+      "propagate": false
     }
   },
   "root": {
-    "level": "DEBUG",
+    "level": "INFO",
     "handlers": ["console"]
   }
 }

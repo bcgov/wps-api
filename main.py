@@ -12,6 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import schemas
 from forecasts import fetch_forecasts
 from auth import authenticate
+import wildfire_one
+import config
 
 LOGGING_CONFIG = 'logging.json'
 if os.path.exists(LOGGING_CONFIG):
@@ -66,7 +68,7 @@ APP = FastAPI(
     version="0.0.0"
 )
 
-ORIGINS = os.getenv('ORIGINS')
+ORIGINS = config.get('ORIGINS')
 
 APP.add_middleware(
     CORSMiddleware,
@@ -100,7 +102,12 @@ async def get_forecasts(request: schemas.WeatherForecastRequest, authenticated: 
 async def get_stations():
     """ Return a list of fire weather stations.
     """
-    return schemas.WeatherStationsResponse.parse_file('data/weather_stations.json')
+    try:
+        stations = await wildfire_one.get_stations()
+        return schemas.WeatherStationsResponse(weather_stations=stations)
+    except Exception as exception:
+        LOGGER.critical(exception, exc_info=True)
+        raise
 
 
 @APP.post('/percentiles/', response_model=schemas.CalculatedResponse)
