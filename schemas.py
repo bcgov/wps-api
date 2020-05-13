@@ -64,6 +64,25 @@ class WeatherStationsResponse(BaseModel):
     weather_stations: List[WeatherStation]
 
 
+class WeatherReading(BaseModel):
+    datetime: datetime
+    temperature: float = None
+    relative_humidity: float = None
+    wind_speed: float = None
+    wind_direction: float = None
+    barometric_pressure: float = None
+    precipitation: float = None
+    ffmc: float = None
+    isi: float = None
+    fwi: float = None
+
+
+class WeatherStationHourlyReadings(BaseModel):
+    """ The weather readings for a particular station """
+    weather_readings: List[WeatherReading]
+    station: WeatherStation
+
+
 class WeatherForecastValues(BaseModel):
     """ The predicted weather values. """
     datetime: datetime
@@ -101,6 +120,11 @@ class WeatherForecastResponse(BaseModel):
     forecasts: List[WeatherForecast]
 
 
-class WeatherForecastRequest(BaseModel):
-    """ Request for weather forecasts for a number of stations """
+class WeatherStationHourlyReadingsResponse(BaseModel):
+    """ Response containing a number of hourly readings """
+    hourlies: List[WeatherStationHourlyReadings]
+
+
+class StationCodeList(BaseModel):
+    """ List of station codes """
     stations: List[int]

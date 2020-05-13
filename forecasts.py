@@ -118,31 +118,21 @@ async def fetch_forecast(session: ClientSession, station: WeatherStation) -> Wea
     return forecast
 
 
-async def fetch_forecast_with_semaphore(
-        semaphore: asyncio.Semaphore,
-        station: WeatherStation, session: ClientSession) -> asyncio.Future:
-    """ Fetch a forecast for a station using a semaphor.
-    """
-    async with semaphore:
-        return await fetch_forecast(session, station)
-
-
 async def fetch_forecasts(station_codes: List[int]) -> asyncio.Future:
     """ Fetch forecasts for all stations concurrently.
     """
     # Create a list containing all the tasks to run in parallel.
     tasks = []
     # Limit the number of concurrent tasks that can be run to 10, using a semaphore.
-    # NOTE: Wouldn't using TCPConnector with a pool limit give us the same as using the semaphore?
-    semaphore = asyncio.Semaphore(10)
+    conn = TCPConnector(limit=10)
 
+    # NOTE: this should be re-factored to re-use the same ClientSession
     stations = await get_stations_by_codes(station_codes)
 
-    async with ClientSession() as session:
+    async with ClientSession(connector=conn) as session:
         # Line up tasks
         for station in stations:
-            task = asyncio.create_task(
-                fetch_forecast_with_semaphore(semaphore, station, session))
+            task = asyncio.create_task(fetch_forecast(station, session))
             tasks.append(task)
         # Run the tasks concurrently, waiting for them all to complete.
         return await asyncio.gather(*tasks)
