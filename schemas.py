@@ -65,6 +65,7 @@ class WeatherStationsResponse(BaseModel):
 
 
 class WeatherReading(BaseModel):
+    """ Weather reading for a particular point in time """
     datetime: datetime
     temperature: float = None
     relative_humidity: float = None

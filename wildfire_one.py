@@ -2,14 +2,13 @@
 """
 import json
 from datetime import datetime, timedelta
-from urllib.parse import urlencode
 import math
 from abc import abstractmethod, ABC
 import logging
 from typing import List
+import asyncio
 from aiohttp import ClientSession, BasicAuth, TCPConnector
 from schemas import WeatherStation, WeatherStationHourlyReadings, WeatherReading
-import asyncio
 import config
 
 LOGGER = logging.getLogger(__name__)
@@ -91,8 +90,6 @@ async def _fetch_raw_stations(session: ClientSession, headers: dict, query_build
     while page_count < total_pages:
         # Build up the request URL.
         url, params = query_builder.query(page_count)
-        LOGGER.warn(url)
-        LOGGER.warn(params)
         LOGGER.debug('loading station page %d...', page_count)
         async with session.get(url, headers=headers, params=params) as response:
             station_json = await response.json()
@@ -219,7 +216,9 @@ async def get_stations() -> List[WeatherStation]:
     return _get_stations_local()
 
 
-async def fetch_hourlies(session: ClientSession, raw_station: dict, headers: dict) -> WeatherStationHourlyReadings:
+def prepare_fetch_hourlies_query(raw_station):
+    """ Prepare url and params to fetch hourly readings from the WFWX Fireweather API.
+    """
     base_url = config.get('WFWX_BASE_URL')
     # By default we're concerned with the last 5 days only
     now = datetime.now()
@@ -230,12 +229,23 @@ async def fetch_hourlies(session: ClientSession, raw_station: dict, headers: dic
     station_id = raw_station['id']
     params = {'startTimestamp': start_time_stamp,
               'endTimestamp': end_time_stamp, 'stationId': station_id}
-    endpoint = '/v1/hourlies/search/findHourliesByWeatherTimestampBetweenAndStationIdEqualsOrderByWeatherTimestampAsc'
+    endpoint = ('/v1/hourlies/search/'
+                'findHourliesByWeatherTimestampBetweenAndStationIdEqualsOrderByWeatherTimestampAsc')
     url = '{base_url}{endpoint}'.format(
         base_url=base_url,
         endpoint=endpoint)
-    LOGGER.debug('fetching hourlies for %s(%s) from %s to %s',
-                 raw_station['displayLabel'], raw_station['stationCode'], five_days_ago, now)
+    return url, params
+
+
+async def fetch_hourlies(
+        session: ClientSession,
+        raw_station: dict,
+        headers: dict) -> WeatherStationHourlyReadings:
+    """ Fetch hourly weather readings for a give station.
+    """
+    url, params = prepare_fetch_hourlies_query(raw_station)
+    LOGGER.debug('fetching hourlies for %s(%s)',
+                 raw_station['displayLabel'], raw_station['stationCode'])
     # Get hourlies
     async with session.get(url, params=params, headers=headers) as response:
         hourlies_json = await response.json()
@@ -248,6 +258,8 @@ async def fetch_hourlies(session: ClientSession, raw_station: dict, headers: dic
 
 
 async def get_hourly_readings(station_codes: List[int]) -> List[WeatherStationHourlyReadings]:
+    """ Get the hourly readings for the list of station codes provided.
+    """
     # Create a list containing all the tasks to run in parallel.
     tasks = []
     # Limit the number of concurrent connections.

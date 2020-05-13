@@ -28,10 +28,11 @@ class ResponseAsyncContextManagerBase:
     """ Stubbed asyncronous context manager.
     """
 
-    def __init__(self, url):
+    def __init__(self, url, params=None):
         """ Remember the url so that we can change our response depending on the request.
         """
         self.url = url
+        self.params = params
 
     async def __aenter__(self):
         """ Enter context - return the appropriate response object depending on the url

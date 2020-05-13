@@ -6,7 +6,7 @@ import logging
 from io import StringIO
 from typing import List
 import pandas
-from aiohttp import ClientSession
+from aiohttp import ClientSession, TCPConnector
 from schemas import WeatherForecast, WeatherStation, WeatherForecastValues
 from wildfire_one import get_stations_by_codes
 import config
@@ -132,7 +132,7 @@ async def fetch_forecasts(station_codes: List[int]) -> asyncio.Future:
     async with ClientSession(connector=conn) as session:
         # Line up tasks
         for station in stations:
-            task = asyncio.create_task(fetch_forecast(station, session))
+            task = asyncio.create_task(fetch_forecast(session, station))
             tasks.append(task)
         # Run the tasks concurrently, waiting for them all to complete.
         return await asyncio.gather(*tasks)

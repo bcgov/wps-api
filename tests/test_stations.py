@@ -19,8 +19,7 @@ class ResponseAsyncContextManager(tests.common.ResponseAsyncContextManagerBase):
         """ Enter context - return the appropriate response object depending on the url
         """
         if 'page' in self.url:
-            match = self.url.find('page=')
-            with open('tests/wf1_stations_page{}.json'.format(self.url[match+5:match+6])) as page:
+            with open('tests/wf1_stations_page{}.json'.format(self.params['page'])) as page:
                 return tests.common.ClientResponse(json_response=json.load(page))
         return await super().__aenter__()
 
@@ -52,8 +51,8 @@ class StationsTestCase(TestCase):
                 mock_getenv.side_effect = getenv_side_effect
 
                 # pylint: disable=unused-argument
-                def get_side_effect(url, **args):
-                    return ResponseAsyncContextManager(url)
+                def get_side_effect(url, params=None, **args):
+                    return ResponseAsyncContextManager(url, params)
 
                 mock_get.side_effect = get_side_effect
 
