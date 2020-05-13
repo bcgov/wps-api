@@ -251,7 +251,9 @@ async def fetch_hourlies(
         hourlies_json = await response.json()
         hourlies = []
         for hourly in hourlies_json['_embedded']['hourlies']:
-            hourlies.append(_parse_hourly(hourly))
+            # We only accept "ACTUAL" values:
+            if hourly.get('hourlyMeasurementTypeCode', '').get('id') == 'ACTUAL':
+                hourlies.append(_parse_hourly(hourly))
         LOGGER.debug('fetched %d hourlies for %s(%s)', len(
             hourlies), raw_station['displayLabel'], raw_station['stationCode'])
         return WeatherStationHourlyReadings(weather_readings=hourlies, station=_parse_station(raw_station))
