@@ -23,6 +23,7 @@ gunicorn = "*"
 aiodns = "*"
 aiohttp = "*"
 pandas = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.8"

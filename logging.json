@@ -16,16 +16,17 @@
   "loggers": {
     "forecasts": {
       "level": "DEBUG",
-      "handlers": [
-        "console"
-      ],
+      "handlers": ["console"],
+      "propagate": false
+    },
+    "auth": {
+      "level": "DEBUG",
+      "handlers": ["console"],
       "propagate": false
     }
   },
   "root": {
     "level": "DEBUG",
-    "handlers": [
-      "console"
-    ]
+    "handlers": ["console"]
   }
 }
