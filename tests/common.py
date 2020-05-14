@@ -53,12 +53,19 @@ class ResponseAsyncContextManagerBase:
         """
 
 
-class ResponseAsyncContextManagerAutoFixture(ABC):
-    """ Stubbed asyncronous context manager that pulls in fixtures automatically. """
+class FixtureResolver:
+    def __init__(self, url, params=None):
+        self.url = url
+        self.params = params
+        self._ignore_params = ['disableDeveloperFilter', 'grant_type', 'scope']
 
-    @abstractmethod
     def _clean_params(self):
-        pass
+        """ Remove troublesome parameters.
+        """
+        # We ignore all these params
+        for item in self._ignore_params:
+            if item in self.params:
+                del self.params[item]
 
     def _get_fixture_path(self):
         """ Return the filename of the fixture file.
@@ -75,19 +82,28 @@ class ResponseAsyncContextManagerAutoFixture(ABC):
         # Slap .json on the end.
         return filename + '.json'
 
-    def __init__(self, url, params=None):
-        """ Remember the url so that we can change our response depending on the request.
-        """
-        self.url = url
-        self.params = params
-
-    async def __aenter__(self):
-        """ Enter context """
+    def get_fixture_json(self):
+        # TODO: right herer dude! So - rather than assume it's json, look at the fixture and see if it's text or json
         fixture = self._get_fixture_path()
         if os.path.exists(fixture):
             with open(fixture, 'r') as fixture_file:
-                return ClientResponse(json_response=json.load(fixture_file))
-        raise Exception('fixture not found: {}'.format(fixture))
+                return json.load(fixture_file)
+        else:
+            raise Exception('fixture not found: {}'.format(fixture))
+
+
+class ResponseAsyncContextManagerAutoFixture:
+    """ Stubbed asyncronous context manager that pulls in fixtures automatically. """
+
+    def __init__(self, url, params=None):
+        """ Remember the url so that we can change our response depending on the request.
+        """
+        self._fixture_resolver = FixtureResolver(url, params)
+
+    async def __aenter__(self):
+        """ Enter context """
+        fixture_json = self._fixture_resolver.get_fixture_json()
+        return ClientResponse(json_response=fixture_json)
 
     # pylint: disable=invalid-name
     async def __aexit__(self, exc_type, exc, tb):

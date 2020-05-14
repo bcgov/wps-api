@@ -14,14 +14,10 @@ class ResponseAsyncContextManager(tests.common.ResponseAsyncContextManagerAutoFi
     """ Stubbed asyncronous context manager.
     """
 
-    def _clean_params(self):
-        """ Remove troublesome parameters.
-        """
-        # We ignore the timestamps.
-        ignore = ['startTimestamp', 'endTimestamp']
-        for item in ignore:
-            if item in self.params:
-                del self.params[item]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._fixture_resolver._ignore_params.extend(
+            ['startTimestamp', 'endTimestamp'])
 
 
 @scenario('test_get_hourlies.feature', 'Get hourlies',
@@ -43,6 +39,7 @@ def response(mock_client_session_get, codes):
     # Attach a side effect to the mocked out ClientSession.
     # pylint: disable=unused-argument
     def get_side_effect(url, params=None, **args):
+        print('URL: {}'.format(url))
         return ResponseAsyncContextManager(url, params)
     mock_client_session_get.side_effect = get_side_effect
 

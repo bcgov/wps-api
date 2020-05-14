@@ -86,8 +86,8 @@ async def get_health():
 
 
 @APP.post('/forecasts/', response_model=schemas.WeatherForecastResponse)
-async def get_forecasts(request: schemas.WeatherForecastRequest, _: bool = Depends(authenticate)):
-    # async def get_forecasts(request: schemas.WeatherForecastRequest):
+async def get_forecasts(request: schemas.StationCodeList, _: bool = Depends(authenticate)):
+    # async def get_forecasts(request: schemas.StationCodeList):
     """ Returns 10 day noon forecasts based on the global deterministic prediction system (GDPS)
     for the specified set of weather stations. """
     try:

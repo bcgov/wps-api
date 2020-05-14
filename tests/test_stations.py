@@ -42,7 +42,7 @@ class StationsTestCase(TestCase):
                         'WFWX_USER': 'user',
                         'WFWX_SECRET': 'secret',
                         'ORIGINS': 'secret',
-                        'WFWX_AUTH_URL': 'http://localhost/token',
+                        'WFWX_AUTH_URL': 'http://localhost/v1/oauth/token',
                         'WFWX_BASE_URL': 'http://localhost/page',
                         'WFWX_MAX_PAGE_SIZE': 1000
                     }
