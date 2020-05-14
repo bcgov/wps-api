@@ -85,9 +85,9 @@ async def get_health():
     return {"message": "Healthy as ever"}
 
 
-# pylint: disable=unused-argument
 @APP.post('/forecasts/', response_model=schemas.WeatherForecastResponse)
-async def get_forecasts(request: schemas.WeatherForecastRequest, authenticated: bool = Depends(authenticate)):
+async def get_forecasts(request: schemas.WeatherForecastRequest, _: bool = Depends(authenticate)):
+    # async def get_forecasts(request: schemas.WeatherForecastRequest):
     """ Returns 10 day noon forecasts based on the global deterministic prediction system (GDPS)
     for the specified set of weather stations. """
     try:

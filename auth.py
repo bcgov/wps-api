@@ -5,17 +5,16 @@ import logging
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import jwt
+import config
 
 LOGGER = logging.getLogger(__name__)
 
-KEYCLOAK_PUBLIC_KEY = os.getenv('KEYCLOAK_PUBLIC_KEY')
+# RSA public key format
+keycloak_public_key = '-----BEGIN PUBLIC KEY-----\n' + \
+    config.get('KEYCLOAK_PUBLIC_KEY') + '\n-----END PUBLIC KEY-----'
 
 # Parse request header and pass the token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
-
-# RSA public key format
-keycloak_public_key = '-----BEGIN PUBLIC KEY-----\n' + \
-    KEYCLOAK_PUBLIC_KEY + '\n-----END PUBLIC KEY-----'
 
 
 async def authenticate(token: str = Depends(oauth2_scheme)):
