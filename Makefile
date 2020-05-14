@@ -4,7 +4,8 @@ init:
 
 test:
 	# Run tests in virtual environment.
-	pipenv run python -m unittest
+	#pipenv run python -m unittest
+	pipenv run python -m pytest
 
 lint:
 	# Run lint in virtual environment.
@@ -14,7 +15,7 @@ run:
 	# Run the application in the virtual environment (after linting and testing).
 	# Not failing on lint or test - just output so developer knows.
 	-pipenv run pylint --rcfile=.pylintrc *.py **/*.py
-	-pipenv run python -m unittest
+	-pipenv run python -m pytest
 	pipenv run uvicorn main:APP --reload --port 8080
 
 run-fast:
@@ -32,7 +33,7 @@ docker-dev-test:
 	# Run tests in docker (dev instance).
 	# We use the dev instance, because the "production" version doesn't have
 	# a number of the development dependancies.
-	docker-compose -f docker-compose.dev.yml run api-dev pipenv run python -m unittest
+	docker-compose -f docker-compose.dev.yml run api-dev pipenv run python -m pytest
 
 docker-dev-lint:
 	# Run lint in docker (dev instance).
@@ -50,6 +51,8 @@ docker-run:
 
 docker-build-dev:
 	# Build dev docker images.
+	# Having issues? try: docker volume prune
+	# Still having issues? try: docker system prune
 	docker-compose -f docker-compose.dev.yml build
 
 docker-run-dev:

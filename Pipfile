@@ -23,6 +23,7 @@ gunicorn = "*"
 aiodns = "*"
 aiohttp = "*"
 pandas = "*"
+pytest-bdd = "*"
 
 [requires]
 python_version = "3.8"
