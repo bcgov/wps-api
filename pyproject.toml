@@ -21,6 +21,9 @@ uvicorn = "^0.11.5"
 geopandas = "^0.7.0"
 pylint = "^2.5.3"
 alembic = "^1.4.2"
+pytz = "^2020.1"
+requests_ntlm = "^1.1.0"
+python-dotenv = "^0.14.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.6"
