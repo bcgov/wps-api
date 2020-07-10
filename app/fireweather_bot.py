@@ -116,7 +116,6 @@ async def get_csv(
     csv_file = open(TEMP_CSV_FILENAME, 'wb')
     csv_file.write(content)
     csv_file.close()
-    return
 
 async def get_noon_forecasts():
     """ Send POST request to BC FireWeather API to generate a CSV,
