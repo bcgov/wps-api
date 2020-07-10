@@ -106,9 +106,9 @@ async def get_csv(
     """ Fetch CSV of hourly actual weather for a station.
     """
     url = config.get('BC_FIRE_WEATHER_BASE_URL') + csv_url
-    response =  session.get(
-            url,
-            auth=HttpNtlmAuth('idir\\'+config.get('BC_FIRE_WEATHER_USER'), config.get('BC_FIRE_WEATHER_SECRET'))
+    response = session.get(
+        url,
+        auth=HttpNtlmAuth('idir\\'+config.get('BC_FIRE_WEATHER_USER'), config.get('BC_FIRE_WEATHER_SECRET'))
     )
     content = response.content
 
