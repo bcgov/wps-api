@@ -6,9 +6,7 @@ Revises: 8a4983fe2f75
 Create Date: 2020-07-07 09:29:19.833161
 
 """
-import datetime
 import sqlalchemy as sa
-import pytz
 from alembic import op
 
 # revision identifiers, used by Alembic.
