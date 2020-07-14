@@ -73,7 +73,7 @@ def prepare_fetch_noon_forecasts_query():
     base_url = config.get('BC_FIRE_WEATHER_BASE_URL')
     start_date = _get_start_date()
     end_date = _get_end_date()
-    LOGGER.debug('requesting forecasts from %s to %s', start_date, end_date)
+    LOGGER.debug('requesting noon forecasts from %s to %s', start_date, end_date)
     # Prepare query params and query:
     request_body = {
         'Start_Date': int(start_date),
@@ -130,7 +130,7 @@ async def get_noon_forecasts():
         await get_csv(session, csv_url)
         # Parse the CSV data
         parse_csv()
-        LOGGER.debug('Finished writing forecasts to database')
+        LOGGER.debug('Finished writing noon forecasts to database')
 
 def parse_csv():
     """ Given a CSV of forecast noon-time weather data for a station, load the CSV into a

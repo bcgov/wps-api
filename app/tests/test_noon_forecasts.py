@@ -12,6 +12,6 @@ def mock_request_noon_forecast(monkeypatch):
 
 def test_main():
     """ Run main method to test """
+    # mock writing the data to the database
     session = UnifiedAlchemyMagicMock()
     fireweather_bot.main()
-    
