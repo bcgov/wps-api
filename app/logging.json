@@ -14,7 +14,7 @@
     }
   },
   "loggers": {
-    "forecasts": {
+    "models": {
       "level": "DEBUG",
       "handlers": ["console"],
       "propagate": false

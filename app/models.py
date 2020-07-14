@@ -8,7 +8,7 @@ from typing import List
 import pytz
 import pandas
 from aiohttp import ClientSession, TCPConnector
-from schemas import WeatherForecast, WeatherStation, WeatherForecastValues
+from schemas import WeatherModel, WeatherStation, WeatherModelValues
 from wildfire_one import get_stations_by_codes
 import config
 
@@ -61,8 +61,8 @@ def get_key_map():
     }
 
 
-async def fetch_forecast(session: ClientSession, station: WeatherStation) -> WeatherForecast:
-    """ Return the forecast for a weather station from spotwx.
+async def fetch_model(session: ClientSession, station: WeatherStation) -> WeatherModel:
+    """ Return the model for a weather station from spotwx.
     """
     params = {
         'key': config.get('SPOTWX_API_KEY'),
@@ -116,15 +116,15 @@ async def fetch_forecast(session: ClientSession, station: WeatherStation) -> Wea
         lambda row: row.name.tz_localize(tz=pytz.utc).isoformat(), axis=1)
     # Rename all columns using our key map.
     data = data.rename(columns=get_key_map())
-    # Create forecast object to return.
-    forecast = WeatherForecast(station=station)
+    # Create model object to return.
+    model = WeatherModel(station=station)
     for row in data.to_dict(orient='records'):
-        forecast.values.append(WeatherForecastValues(**row))
-    return forecast
+        model.values.append(WeatherModelValues(**row))
+    return model
 
 
-async def fetch_forecasts(station_codes: List[int]) -> asyncio.Future:
-    """ Fetch forecasts for all stations concurrently.
+async def fetch_models(station_codes: List[int]) -> asyncio.Future:
+    """ Fetch models for all stations concurrently.
     """
     # Create a list containing all the tasks to run in parallel.
     tasks = []
@@ -137,7 +137,7 @@ async def fetch_forecasts(station_codes: List[int]) -> asyncio.Future:
     async with ClientSession(connector=conn) as session:
         # Line up tasks
         for station in stations:
-            task = asyncio.create_task(fetch_forecast(session, station))
+            task = asyncio.create_task(fetch_model(session, station))
             tasks.append(task)
         # Run the tasks concurrently, waiting for them all to complete.
         return await asyncio.gather(*tasks)

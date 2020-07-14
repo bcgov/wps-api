@@ -1,4 +1,4 @@
-""" Functional testing for /forecasts/ endpoint.
+""" Functional testing for /models/ endpoint.
 """
 import logging
 from datetime import datetime
@@ -14,20 +14,20 @@ LOGGER = logging.getLogger(__name__)
 # pylint: disable=unused-argument, redefined-outer-name, eval-used
 
 
-@scenario("test_forecasts.feature", "Get forecasts from spotwx",
-          example_converters=dict(codes=str, status=int, num_forecasts=int))
-def test_forecasts_scenario():
+@scenario("test_models.feature", "Get models from spotwx",
+          example_converters=dict(codes=str, status=int, num_models=int))
+def test_models_scenario():
     """ BDD Scenario. """
 
 
-@given("I request weather forecasts for stations: <codes>")
+@given("I request weather models for stations: <codes>")
 def response(monkeypatch, mock_jwt_decode, codes):
-    """ Mock external requests and make GET /forecasts/ request """
+    """ Mock external requests and make GET /models/ request """
     monkeypatch.setattr(ClientSession, 'get', default_mock_client_get)
 
     client = TestClient(app)
     stations = eval(codes)
-    return client.post('/forecasts/', headers={'Authorization': 'Bearer token'}, json={'stations': stations})
+    return client.post('/models/', headers={'Authorization': 'Bearer token'}, json={'stations': stations})
 
 
 @then("the response status code is <status>")
@@ -36,22 +36,22 @@ def status_code(response, status: int):
     assert response.status_code == status
 
 
-@then("there are <num_forecasts> from two stations")
-def num_of_forecasts(response, num_forecasts):
-    """ Assert that we receive the corrent number of forecast """
-    assert len(response.json()['forecasts']) == num_forecasts
+@then("there are <num_models> from two stations")
+def num_of_models(response, num_models):
+    """ Assert that we receive the corrent number of model """
+    assert len(response.json()['models']) == num_models
 
 
-@then("there are 3 hourly forecast with 10 days of interpolated noon values for each station")
-def ten_days_of_forecasts(response):
-    """ We're expecting a 10 day forecast. """
+@then("there are 3 hourly model with 10 days of interpolated noon values for each station")
+def ten_days_of_models(response):
+    """ We're expecting a 10 day model. """
     num_of_3_hourly = 81
     num_of_noons = 10
-    assert len(response.json()['forecasts'][0]
+    assert len(response.json()['models'][0]
                ['values']) == num_of_3_hourly + num_of_noons
 
 
-@then("forecast values should be interpolated")
+@then("model values should be interpolated")
 def expect_interpolated_values(response):
     """ We're expecting interpolated values, so we check on of the calculations. """
     # dates matching csv file:
@@ -62,6 +62,6 @@ def expect_interpolated_values(response):
     # calculate interpolated temperature
     expected_temperature = numpy.interp(datetime.fromisoformat(
         '2020-05-04T20:00:00').timestamp(), x_p, f_p)
-    noon = response.json()['forecasts'][0]['values'][3]
+    noon = response.json()['models'][0]['values'][3]
     noon_temperature = noon['temperature']
     assert noon_temperature == expected_temperature

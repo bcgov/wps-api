@@ -11,7 +11,7 @@ def get_forecast_models(db_session: Session):
 
 
 def create_single_forecast(db_session: Session,
-                           forecast: schemas.WeatherForecastValues,
+                           forecast: schemas.WeatherModelValues,
                            issue_date: str,
                            weather_station: int):
     """ Create a new single forecast

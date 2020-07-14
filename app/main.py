@@ -9,7 +9,7 @@ import logging.config
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import schemas
-from forecasts import fetch_forecasts
+from models import fetch_models
 from percentile import get_precalculated_percentiles
 from auth import authenticate
 import wildfire_one
@@ -85,14 +85,13 @@ async def get_health():
     return {"message": "Healthy as ever"}
 
 
-@app.post('/forecasts/', response_model=schemas.WeatherForecastResponse)
-async def get_forecasts(request: schemas.StationCodeList, _: bool = Depends(authenticate)):
-    # async def get_forecasts(request: schemas.WeatherForecastRequest):
-    """ Returns 10 day noon forecasts based on the global deterministic prediction system (GDPS)
+@app.post('/models/', response_model=schemas.WeatherModelResponse)
+async def get_models(request: schemas.StationCodeList, _: bool = Depends(authenticate)):
+    """ Returns 10 day noon models based on the global deterministic prediction system (GDPS)
     for the specified set of weather stations. """
     try:
-        forecasts = await fetch_forecasts(request.stations)
-        return schemas.WeatherForecastResponse(forecasts=forecasts)
+        models = await fetch_models(request.stations)
+        return schemas.WeatherModelResponse(models=models)
     except Exception as exception:
         LOGGER.critical(exception, exc_info=True)
         raise

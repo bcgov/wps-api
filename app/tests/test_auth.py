@@ -13,9 +13,9 @@ def test_auth_1st_scenario():
 
 @given("I am an unauthenticated user <token> when I access a protected endpoint")
 def response(token: str):
-    """ Make POST /forecasts/ request which is protected """
+    """ Make POST /models/ request which is protected """
     client = TestClient(app)
-    return client.post('/forecasts/', headers={'Authorization': token})
+    return client.post('/models/', headers={'Authorization': token})
 
 
 @then("I will get an error with <status> code")
@@ -37,9 +37,9 @@ def test_auth_2nd_scenario():
 
 @given("I am an authenticated user when I access a protected endpoint")
 def response_2(mock_jwt_decode):
-    """ Make POST /forecasts/ request which is protected """
+    """ Make POST /models/ request which is protected """
     client = TestClient(app)
-    return client.post('/forecasts/', headers={'Authorization': 'Bearer token'}, json={"stations": []})
+    return client.post('/models/', headers={'Authorization': 'Bearer token'}, json={"stations": []})
 
 
 @then("I shouldn't get an unauthorized error <status> code")

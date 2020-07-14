@@ -85,16 +85,16 @@ class WeatherStationHourlyReadings(BaseModel):
     station: WeatherStation
 
 
-class WeatherForecastModel(BaseModel):
+class ForecastModel(BaseModel):
     """ The full name & acronym for a weather forecast model """
     name: str
     abbrev: str
 
 
-class WeatherForecastValues(BaseModel):
+class WeatherModelValues(BaseModel):
     """ The predicted weather values. """
     datetime: datetime
-    forecast_model: WeatherForecastModel = None
+    forecast_model: ForecastModel = None
     temperature: float = None
     dew_point: float = None
     relative_humidity: float = None
@@ -118,15 +118,15 @@ class WeatherForecastValues(BaseModel):
     wind_direction_850mb: float = None
 
 
-class WeatherForecast(BaseModel):
-    """ Weather forecast for a particular weather station. """
+class WeatherModel(BaseModel):
+    """ Weather model for a particular weather station. """
     station: WeatherStation
-    values: List[WeatherForecastValues] = []
+    values: List[WeatherModelValues] = []
 
 
-class WeatherForecastResponse(BaseModel):
-    """ Response containg a number of weather forecasts. """
-    forecasts: List[WeatherForecast]
+class WeatherModelResponse(BaseModel):
+    """ Response containg a number of weather models. """
+    models: List[WeatherModel]
 
 
 class WeatherStationHourlyReadingsResponse(BaseModel):
