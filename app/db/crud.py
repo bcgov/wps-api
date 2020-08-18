@@ -25,9 +25,12 @@ def get_most_recent_model_run(
     :abbreviation: e.g. GDPS or RDPS
     :projection: e.g. latlon.15x.15
     """
+    # NOTE: Don't be fooled into saying "PredictionModelRunTimestamp.complete is True", it won't work.
     return session.query(PredictionModelRunTimestamp).\
         join(PredictionModel).\
+        filter(PredictionModel.id == PredictionModelRunTimestamp.prediction_model_id).\
         filter(PredictionModel.abbreviation == abbreviation, PredictionModel.projection == projection).\
+        filter(PredictionModelRunTimestamp.complete == True).\
         order_by(PredictionModelRunTimestamp.prediction_run_timestamp.desc()).\
         first()
 

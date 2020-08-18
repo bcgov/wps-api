@@ -149,7 +149,6 @@ def _fetch_model_predictions_by_stations(
     predictions_in_grid = {}
 
     for grid, prediction_record in query:
-        logger.info('grid: {}'.format(grid))
         if grid != prev_grid:
             prev_grid = grid
             predictions_in_grid = {}
@@ -175,7 +174,6 @@ def _fetch_model_predictions_by_stations(
             _add_model_prediction_record_to_prediction_schema(
                 prediction, prediction_record, points, noon_interpolator)
         # NOTE: The code would be much simpler if we only did the interpolation afterwards.
-    logger.info('predictions: {}'.format(predictions))
 
     return predictions
 
