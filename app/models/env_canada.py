@@ -12,6 +12,7 @@ import logging.config
 import time
 import tempfile
 import requests
+from sqlalchemy.orm import Session
 import app.db.database
 from app.models import ModelEnum
 from app.db.crud import get_processed_file_record
@@ -104,10 +105,8 @@ def get_model_run_hours():
         yield hour
 
 
-def get_model_run_download_urls(hour: int):
+def get_model_run_download_urls(now: datetime.datetime, hour: int):
     """ Yield urls to download. """
-    # We always work in UTC:
-    now = get_utcnow()
 
     # hh: model run start, in UTC [00, 12]
     # hhh: prediction hour [000, 003, 006, ..., 240]
@@ -159,7 +158,7 @@ def download(url: str, path: str) -> str:
     return target
 
 
-def flag_file_as_processed(session, url):
+def flag_file_as_processed(session: Session, url):
     """ Flag the file as processed in the database """
     processed_file = get_processed_file_record(session, url)
     if processed_file:
@@ -174,17 +173,40 @@ def flag_file_as_processed(session, url):
     session.commit()
 
 
-def mark_prediction_model_processed(session, hour):
-    now = get_utcnow()
+def check_if_model_run_complete(session: Session, model: ModelEnum, projection: str, now: datetime.datetime, hour: int):
+    """ Check if a particular model run is complete """
 
-    prediction_model = db.crud.get_prediction_model(
-        session, ModelEnum.GDPS, app.db.crud.LATLON_15X_15)
+    # Get all the download urls for a particular model run.
+    urls = get_model_run_download_urls(now, hour)
+    # Start off assuming it's complete, then attempt to falsify assumption.
+    complete = True
+    # Iterate through url's.
+    for url, _ in urls:
+        # Check if url as been processed.
+        processed_file_record = get_processed_file_record(session, url)
+        # If the url has not been processed, mark as false and stop.
+        if not processed_file_record:
+            logger.info(
+                'for model {}:{} run {}, url {} not yet processed'.format(model, projection, hour, url))
+            complete = False
+            break
+    return complete
+
+
+def mark_prediction_model_processed(session: Session,
+                                    model: ModelEnum,
+                                    projection: str,
+                                    now: datetime.datetime,
+                                    hour: int):
+
+    prediction_model = app.db.crud.get_prediction_model(
+        session, model, projection)
     prediction_run_timestamp = datetime.datetime(
         year=now.year,
         month=now.month,
         day=now.day,
         hour=hour, tzinfo=datetime.timezone.utc)
-    prediction_run = db.crud.get_prediction_run(
+    prediction_run = app.db.crud.get_prediction_run(
         session,
         prediction_model.id,
         prediction_run_timestamp)
@@ -199,9 +221,11 @@ def main():
     files_downloaded = 0
     files_processed = 0
     exception_count = 0
+    # We always work in UTC:
+    now = get_utcnow()
     for hour in get_model_run_hours():
         logger.info('Processing GDPS model run {:02d}'.format(hour))
-        urls = get_model_run_download_urls(hour)
+        urls = get_model_run_download_urls(now, hour)
         processor = GribFileProcessor()
         with tempfile.TemporaryDirectory() as tmp_path:
             for url, filename in urls:
@@ -231,19 +255,17 @@ def main():
                                 os.remove(downloaded)
                 # pylint: disable=broad-except
                 except Exception as exception:
-                    model_run_failure_count += 1
                     exception_count += 1
                     # We catch and log exceptions, but keep trying to download.
                     # We intentionally catch a broad exception, as we want to try and download as much
                     # as we can.
                     logger.error('unexpected exception processing %s',
                                  url, exc_info=exception)
-        # if we didn't run into any errors, it means we've succesfully downloaded and
-        # processed all the predictions for this model run.
-        # TODO: change this - need a better way of checking that we're done!
-        # logger.info(
-            # 'GDPS model run {:02d} completed with SUCCESS'.format(hour))
-        # mark_prediction_model_processed(session, hour)
+        if check_if_model_run_complete(session, ModelEnum.GDPS, app.db.crud.LATLON_15X_15, now, hour):
+            logger.info(
+                'GDPS model run {:02d} completed with SUCCESS'.format(hour))
+            mark_prediction_model_processed(
+                session, ModelEnum.GDPS, app.db.crud.LATLON_15X_15, now, hour)
 
     execution_time = round(time.time() - start_time, 1)
     logger.info('%d downloaded, %d processed in total, took %s seconds',
@@ -255,6 +277,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as exception:
+        # We catch and log any exceptions we may have missed.
+        logger.error('unexpected exception processing %s',
+                     url, exc_info=exception)
+        # Exit with a failure code.
+        sys.exit(os.EX_SOFTWARE)
     # We assume success if we get to this point.
     sys.exit(os.EX_OK)
