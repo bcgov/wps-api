@@ -37,6 +37,10 @@ IMAGE_NAMESPACE=${PROJ_TOOLS}
 # Process template
 # Note: A role issue is currenty preventing use of the image if it resides in the tools project.
 OC_PROCESS="oc -n ${PROJ_TARGET} process -f ${TEMPLATE_PATH}/patroni.yaml \
+-p CPU_REQUEST=500m \
+-p CPU_LIMIT=2 \
+-p MEMORY_REQUEST=256Mi \
+-p MEMORY_LIMIT=2Gi \
 -p NAME=${NAME_APP} \
 -p SUFFIX=${SUFFIX} \
 -p PATRONI_CLUSTER_NAME=${PATRONI_CLUSTER_NAME} \

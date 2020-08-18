@@ -128,6 +128,8 @@ def _fetch_model_predictions_by_stations(
     # Get the most recent model run:
     most_recent_run = app.db.crud.get_most_recent_model_run(
         session, model, app.db.crud.LATLON_15X_15)
+    logger.info(
+        'most recent run: {0.prediction_run_timestamp}'.format(most_recent_run))
     # Get the predictions:
     query = app.db.crud.get_model_run_predictions(
         session, most_recent_run, map(lambda station: [station.long, station.lat], stations))
@@ -147,6 +149,7 @@ def _fetch_model_predictions_by_stations(
     predictions_in_grid = {}
 
     for grid, prediction_record in query:
+        logger.info('grid: {}'.format(grid))
         if grid != prev_grid:
             prev_grid = grid
             predictions_in_grid = {}
@@ -172,6 +175,7 @@ def _fetch_model_predictions_by_stations(
             _add_model_prediction_record_to_prediction_schema(
                 prediction, prediction_record, points, noon_interpolator)
         # NOTE: The code would be much simpler if we only did the interpolation afterwards.
+    logger.info('predictions: {}'.format(predictions))
 
     return predictions
 

@@ -98,6 +98,7 @@ async def get_model_predictions(
     try:
         LOGGER.info('/models/%s/predictions/', model.name)
         model_predictions = await fetch_model_predictions(model, request.stations)
+        LOGGER.info('going to return {}'.format(model_predictions))
         return schemas.WeatherModelPredictionResponse(predictions=model_predictions)
     except Exception as exception:
         LOGGER.critical(exception, exc_info=True)

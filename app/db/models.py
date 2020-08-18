@@ -69,6 +69,8 @@ class PredictionModelRunTimestamp(Base):
     prediction_model = relationship("PredictionModel")
     # The date and time of the model run.
     prediction_run_timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
+    # Indicate if this particular model run is completely downloaded.
+    complete = Column(Boolean, nullable=False)
 
 
 class PredictionModelGridSubset(Base):
